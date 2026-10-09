@@ -24,6 +24,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Ensure Pages source is set to GitHub Actions
+        id: switch
+        continue-on-error: true
+        run: |
+          CODE=$(curl -s -o /tmp/resp.json -w "%{http_code}" \
+            -X PUT \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages" \
+            -d '{"build_type_source":"actions"}')
+          echo "pages source switch http=$CODE"; cat /tmp/resp.json
       - name: Set up Pages
         uses: actions/configure-pages@v5
         with:
