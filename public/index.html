@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚔ IRON WILL — Metal Todo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Cinzel:wght@500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0b10; --panel:#12121a; --panel2:#1a1a26;
+  --blood:#e11d2e; --blood-dark:#8f0f1d;
+  --chrome1:#f5f5f7; --chrome2:#9a9aa5;
+  --steel:#c7c7d1; --dim:#6f6f7a;
+  --bone:#efe9dd;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  min-height:100vh; background:var(--bg); color:var(--bone);
+  font-family:'Noto Sans TC',sans-serif;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(225,29,46,.14), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+.wrap{max-width:640px;margin:0 auto;padding:48px 16px 80px}
+
+/* ── Header ── */
+header{text-align:center;margin-bottom:32px}
+.logo{
+  font-family:'Metal Mania',cursive; font-size:clamp(44px,9vw,64px); line-height:1;
+  letter-spacing:4px;
+  background:linear-gradient(180deg,#fff 0%,#d8d8e0 35%,#6e6e78 50%,#d0d0da 55%,#fff 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 3px 1px #000) drop-shadow(0 0 18px rgba(225,29,46,.35));
+}
+.sub{
+  margin-top:6px;color:var(--dim);font-size:13px;letter-spacing:6px;text-transform:uppercase;
+}
+.skull{font-size:34px;filter:drop-shadow(0 0 12px rgba(225,29,46,.5))}
+
+/* ── Panel: spiked top edge via clip-path ── */
+.panel{
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid #2a2a38; border-radius:4px;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.spikes{
+  height:14px;margin-bottom:-14px;position:relative;z-index:1;
+  background:
+    linear-gradient(45deg, transparent 33%, #2a2a38 33%, #2a2a38 66%, transparent 66%) 0 0/14px 14px,
+    linear-gradient(-45deg, transparent 33%, #2a2a38 33%, #2a2a38 66%, transparent 66%) 0 0/14px 14px;
+  filter:drop-shadow(0 -1px 1px rgba(0,0,0,.8));
+}
+
+/* ── Add form ── */
+.add{display:flex;gap:10px;padding:18px 18px 14px;border-bottom:1px solid #262633}
+.add input{
+  flex:1;min-width:0;padding:13px 16px;font-size:15px;color:var(--bone);
+  background:#0d0d14;border:1px solid #333342;border-radius:4px;outline:none;
+  transition:border-color .2s, box-shadow .2s; font-family:inherit;
+}
+.add input::placeholder{color:var(--dim)}
+.add input:focus{border-color:var(--blood);box-shadow:0 0 0 3px rgba(225,29,46,.25)}
+.add button{
+  padding:0 22px;font-family:'Metal Mania',cursive;font-size:18px;letter-spacing:2px;color:#0b0b10;
+  background:linear-gradient(180deg,#ff5a63,var(--blood) 55%,var(--blood-dark));
+  border:none;border-radius:4px;cursor:pointer;
+  box-shadow:0 4px 14px -4px rgba(225,29,46,.6), inset 0 1px 0 rgba(255,255,255,.35);
+  transition:transform .1s, box-shadow .2s;
+}
+.add button:hover{transform:translateY(-1px);box-shadow:0 7px 20px -5px rgba(225,29,46,.8)}
+.add button:active{transform:translateY(1px)}
+
+/* ── Filters + stats ── */
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #262633}
+.tabs{display:flex;gap:6px}
+.tabs button{
+  font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);
+  background:none;border:1px solid transparent;border-radius:3px;padding:6px 12px;cursor:pointer;
+  transition:all .15s;font-family:inherit;
+}
+.tabs button:hover{color:var(--steel)}
+.tabs button[aria-selected="true"]{color:var(--bone);border-color:var(--blood);background:rgba(225,29,46,.12)}
+.stats{font-size:12px;color:var(--dim);letter-spacing:.5px}
+.stats b{color:var(--blood);font-size:14px}
+
+/* ── List ── */
+ul{list-style:none}
+li.item{
+  display:flex;align-items:center;gap:14px;padding:15px 18px;
+  border-bottom:1px solid #20202e;
+  animation:slam .25s cubic-bezier(.2,.9,.3,1.2);
+  transition:background .15s;
+}
+li.item:hover{background:rgba(255,255,255,.025)}
+li.item:last-child{border-bottom:none}
+@keyframes slam{from{opacity:0;transform:translateY(-8px) scale(.98)}to{opacity:1;transform:none}}
+
+.check{
+  position:relative;flex:0 0 auto;width:24px;height:24px;
+}
+.check input{
+  position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0;
+}
+.check .box{
+  position:absolute;inset:0;border:2px solid #3a3a4a;border-radius:4px;background:#0d0d14;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s; pointer-events:none;
+}
+.check .box::after{content:"✕";font-size:13px;color:transparent;transition:color .18s;font-weight:700}
+.check input:checked + .box{border-color:var(--blood);background:rgba(225,29,46,.15);box-shadow:0 0 12px rgba(225,29,46,.4)}
+.check input:checked + .box::after{color:var(--blood)}
+.check input:focus-visible + .box{outline:2px solid var(--blood);outline-offset:2px}
+
+.txt{flex:1;font-size:15px;font-weight:500;position:relative;transition:color .2s;word-break:break-word}
+li.done .txt{color:var(--dim)}
+li.done .txt::before{
+  content:"";position:absolute;left:0;right:0;top:55%;height:2px;
+  background:linear-gradient(90deg,var(--blood),transparent);opacity:.7;
+}
+.del{
+  flex:0 0 auto;width:34px;height:34px;border:none;border-radius:4px;cursor:pointer;
+  background:transparent;color:var(--dim);font-size:17px;line-height:1;
+  transition:all .15s;
+}
+.del:hover{background:rgba(225,29,46,.15);color:var(--blood);transform:scale(1.1)}
+
+/* ── Empty state ── */
+.empty{padding:56px 20px;text-align:center;color:var(--dim)}
+.empty .big{font-size:44px;margin-bottom:12px;filter:grayscale(1) brightness(1.3)}
+.empty p{font-family:'Metal Mania',cursive;font-size:22px;letter-spacing:2px;color:var(--steel)}
+.empty small{display:block;margin-top:8px;font-size:12px;letter-spacing:1px}
+
+/* ── Footer bar ── */
+.foot{display:flex;justify-content:space-between;align-items:center;padding:14px 18px}
+.foot .count{font-size:12px;color:var(--dim);letter-spacing:1px}
+.clear{
+  background:none;border:1px solid #333342;color:var(--dim);font-size:11px;font-weight:700;
+  letter-spacing:1.5px;text-transform:uppercase;padding:7px 14px;border-radius:3px;cursor:pointer;
+  transition:all .15s;font-family:inherit;
+}
+.clear:hover:not(:disabled){color:var(--blood);border-color:var(--blood);background:rgba(225,29,46,.1)}
+.clear:disabled{opacity:.35;cursor:not-allowed}
+
+.meta{text-align:center;margin-top:26px;font-size:11px;color:#3c3c48;letter-spacing:2px}
+@media (max-width:480px){
+  .add{flex-direction:column}
+  .add button{padding:12px}
+  .bar{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="skull">☠</div>
+    <h1 class="logo">IRON WILL</h1>
+    <p class="sub">Forge your tasks · Endure the list</p>
+  </header>
+
+  <div class="spikes" aria-hidden="true"></div>
+  <section class="panel" aria-label="todo list">
+    <form class="add" id="addForm">
+      <input id="newTask" type="text" maxlength="120" placeholder="斬下一件要做的事…"
+             autocomplete="off" aria-label="新事項">
+      <button type="submit" id="addBtn">SMITE ＋</button>
+    </form>
+
+    <div class="bar">
+      <div class="tabs" role="tablist" aria-label="篩選">
+        <button role="tab" aria-selected="true" data-filter="all">全部</button>
+        <button role="tab" aria-selected="false" data-filter="active">未完成</button>
+        <button role="tab" aria-selected="false" data-filter="done">已完成</button>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <ul id="list"></ul>
+
+    <div class="foot">
+      <span class="count" id="count"></span>
+      <button class="clear" id="clearDone">清除已完成</button>
+    </div>
+  </section>
+
+  <p class="meta">localStorage 封存 · 無伺服器 · 純前端</p>
+</div>
+
+<script>
+"use strict";
+const KEY = "ironwill.todos.v1";
+const $ = s => document.querySelector(s);
+let todos = load();
+let filter = "all";
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr.filter(t => t && typeof t.text === "string") : [];
+  }catch{ return []; }
+}
+function save(){
+  localStorage.setItem(KEY, JSON.stringify(todos));
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+function addTask(text){
+  text = text.trim();
+  if(!text) return;
+  todos.push({id:uid(), text, done:false, ts:Date.now()});
+  save(); render();
+}
+function toggle(id){
+  const t = todos.find(t=>t.id===id);
+  if(t){ t.done = !t.done; save(); render(); }
+}
+function remove(id){
+  todos = todos.filter(t=>t.id!==id);
+  save(); render();
+}
+function clearDone(){
+  todos = todos.filter(t=>!t.done);
+  save(); render();
+}
+
+function visible(){
+  if(filter==="active") return todos.filter(t=>!t.done);
+  if(filter==="done")   return todos.filter(t=>t.done);
+  return todos;
+}
+
+function render(){
+  const list = $("#list");
+  const items = visible();
+  list.innerHTML = "";
+
+  if(items.length === 0){
+    const li = document.createElement("li");
+    li.className = "empty";
+    const msg = filter==="done" ? ["「尚未有任何事被征服」","無已完成項目"]
+              : filter==="active"? ["「一切都已了結」","沒有未完成項目 🎤"]
+              : ["「你的命運，待你銘刻」","輸入上方第一件事項"];
+    li.innerHTML = `<div class="big">⚔</div><p>${msg[0]}</p><small>${msg[1]}</small>`;
+    list.appendChild(li);
+  } else {
+    for(const t of items){
+      const li = document.createElement("li");
+      li.className = "item" + (t.done ? " done" : "");
+      li.dataset.id = t.id;
+
+      const cb = document.createElement("label");
+      cb.className = "check";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = t.done;
+      input.setAttribute("aria-label", "標記完成：" + t.text);
+      const box = document.createElement("span");
+      box.className = "box"; box.setAttribute("aria-hidden","true");
+      cb.append(input, box);
+
+      const txt = document.createElement("span");
+      txt.className = "txt";
+      txt.textContent = t.text;
+      txt.addEventListener("dblclick", ()=>toggle(t.id)); // 雙擊切換
+
+      const del = document.createElement("button");
+      del.className = "del";
+      del.textContent = "✕";
+      del.setAttribute("aria-label","刪除：" + t.text);
+      del.addEventListener("click", ()=>remove(t.id));
+
+      input.addEventListener("change", ()=>toggle(t.id));
+      li.append(cb, txt, del);
+      list.appendChild(li);
+    }
+  }
+
+  // stats
+  const total = todos.length, doneN = todos.filter(t=>t.done).length;
+  $("#stats").innerHTML = `<b>${total-doneN}</b> 未完成 ／ ${total} 總數`;
+  $("#count").textContent = `${total} 條任務`;
+  $("#clearDone").disabled = doneN === 0;
+}
+
+// events
+$("#addForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const inp = $("#newTask");
+  addTask(inp.value);
+  inp.value = ""; inp.focus();
+});
+document.querySelectorAll(".tabs [data-filter]").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    filter = btn.dataset.filter;
+    document.querySelectorAll(".tabs [data-filter]").forEach(b=>
+      b.setAttribute("aria-selected", String(b===btn)));
+    render();
+  });
+});
+$("#clearDone").addEventListener("click", clearDone);
+
+render();
+</script>
+</body>
+</html>
